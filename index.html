@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>French Brew - QR Scanner</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    h2 { color: #d6b46a; }
+    #reader {
+      width: 100%;
+      max-width: 420px;
+      margin: 20px auto;
+    }
+    button {
+      background: #d6b46a;
+      color: #111;
+      border: 0;
+      padding: 14px 22px;
+      border-radius: 9px;
+      font-size: 17px;
+      margin: 8px;
+    }
+    #message {
+      margin: 18px auto;
+      overflow-wrap: anywhere;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>FRENCH BREW</h2>
+  <h3>ماسح بطاقة الولاء</h3>
+
+  <div id="reader"></div>
+
+  <button id="startBtn" onclick="startScanner()">
+    فتح الكاميرا
+  </button>
+
+  <div id="message">اضغط لبدء مسح بطاقة الزبون</div>
+
+  <script>
+    let scanner = null;
+    let running = false;
+    let scanned = false;
+
+    function showMessage(text) {
+      document.getElementById("message").textContent = text;
+    }
+
+    async function startScanner() {
+      if (running) return;
+
+      if (typeof Html5Qrcode === "undefined") {
+        showMessage("تعذر تحميل قارئ QR. تحقق من الإنترنت.");
+        return;
+      }
+
+      scanned = false;
+      scanner = new Html5Qrcode("reader");
+
+      try {
+        await scanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 230, height: 230 } },
+          async function(decodedText) {
+            if (scanned) return;
+            scanned = true;
+
+            showMessage("تمت قراءة البطاقة بنجاح!");
+
+            try {
+              await scanner.stop();
+              running = false;
+            } catch(e) {}
+
+            window.opener?.postMessage({
+              type: "FRENCH_BREW_QR",
+              token: decodedText
+            }, "*");
+
+            showMessage("تم إرسال الرمز إلى صفحة العامل. يمكنك العودة إليها.");
+          }
+        );
+
+        running = true;
+        showMessage("وجّه الكاميرا نحو QR الزبون");
+      } catch(error) {
+        showMessage("تعذر فتح الكاميرا: " + error);
+      }
+    }
+  </script>
+
+</body>
+</html>
