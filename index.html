@@ -87,10 +87,10 @@
 
            if (window.opener && !window.opener.closed) {
 
-             window.opener.postMessage({
-               type: "FRENCH_BREW_QR",
-               token: decodedText
-             }, "https://script.google.com");
+            window.opener.postMessage({
+              type: "FRENCH_BREW_QR",
+              token: decodedText
+            }, "*");
 
              setTimeout(function() {
                window.close();
