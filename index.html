@@ -84,12 +84,21 @@
               running = false;
             } catch(e) {}
 
-            window.opener?.postMessage({
-              type: "FRENCH_BREW_QR",
-              token: decodedText
-            }, "*");
+            if (window.opener && !window.opener.closed) {
+  window.opener.postMessage({
+    type: "FRENCH_BREW_QR",
+    token: decodedText
+  }, "https://script.google.com");
 
-            showMessage("تم إرسال الرمز إلى صفحة العامل. يمكنك العودة إليها.");
+  showMessage("تم إرسال الرمز، جارٍ العودة إلى صفحة العامل...");
+
+  setTimeout(function() {
+    window.close();
+  }, 700);
+
+} else {
+  showMessage("تعذر العودة إلى صفحة العامل. أغلق هذه الصفحة يدوياً.");
+}
           }
         );
 
