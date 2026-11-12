@@ -51,73 +51,64 @@
 
   <script>
     let scanner = null;
-    let running = false;
-    let scanned = false;
+let running = false;
+let scanned = false;
 
-    function showMessage(text) {
-      document.getElementById("message").textContent = text;
-    }
-
-    async function startScanner() {
-      if (running) return;
-
-      if (typeof Html5Qrcode === "undefined") {
-        showMessage("تعذر تحميل قارئ QR. تحقق من الإنترنت.");
-        return;
-      }
-
-      scanned = false;
-      scanner = new Html5Qrcode("reader");
-
-      try {
-        await scanner.start(
-          { facingMode: "environment" },
-          { fps: 10, qrbox: { width: 230, height: 230 } },
-          async function(decodedText) {
-            if (scanned) return;
-            scanned = true;
-
-            showMessage("تمت قراءة البطاقة بنجاح!");
-
-            try {
-              await scanner.stop();
-              running = false;
-            } catch(e) {}
-
-            if (window.opener && !window.opener.closed) {
- async function(decodedText) {
-  if (scanned) return;
-  scanned = true;
-
-  showMessage("تمت قراءة البطاقة، جارٍ العودة...");
-
-  try {
-    if (scanner && running) {
-      await scanner.stop();
-      running = false;
-    }
-  } catch(e) {}
-
-  if (window.opener && !window.opener.closed) {
-    window.opener.postMessage({
-      type: "FRENCH_BREW_QR",
-      token: decodedText
-    }, "https://script.google.com");
-
-    window.close();
-  } else {
-    showMessage("تعذر الاتصال بصفحة العامل.");
-  }
+function showMessage(text) {
+  document.getElementById("message").textContent = text;
 }
 
- 
+async function startScanner() {
+  if (running) return;
 
-        running = true;
-        showMessage("وجّه الكاميرا نحو QR الزبون");
-      } catch(error) {
-        showMessage("تعذر فتح الكاميرا: " + error);
+  if (typeof Html5Qrcode === "undefined") {
+    showMessage("تعذر تحميل قارئ QR. تحقق من الإنترنت.");
+    return;
+  }
+
+  scanned = false;
+  scanner = new Html5Qrcode("reader");
+
+  try {
+    await scanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 230, height: 230 } },
+
+      async function(decodedText) {
+        if (scanned) return;
+        scanned = true;
+
+        showMessage("تمت قراءة البطاقة، جارٍ العودة...");
+
+        try {
+          await scanner.stop();
+          running = false;
+        } catch (e) {}
+
+        if (window.opener && !window.opener.closed) {
+
+          window.opener.postMessage({
+            type: "FRENCH_BREW_QR",
+            token: decodedText
+          }, "https://script.google.com");
+
+          setTimeout(function() {
+            window.close();
+          }, 700);
+
+        } else {
+          showMessage("تعذر الاتصال بصفحة العامل.");
+        }
       }
-    }
+    );
+
+    running = true;
+    showMessage("وجّه الكاميرا نحو QR الزبون");
+
+  } catch(error) {
+    showMessage("تعذر فتح الكاميرا: " + error);
+  }
+}
   </script>
 
 </body>
