@@ -85,22 +85,32 @@
             } catch(e) {}
 
             if (window.opener && !window.opener.closed) {
-  window.opener.postMessage({
-    type: "FRENCH_BREW_QR",
-    token: decodedText
-  }, "https://script.google.com");
+ async function(decodedText) {
+  if (scanned) return;
+  scanned = true;
 
-  showMessage("تم إرسال الرمز، جارٍ العودة إلى صفحة العامل...");
+  showMessage("تمت قراءة البطاقة، جارٍ العودة...");
 
-  setTimeout(function() {
+  try {
+    if (scanner && running) {
+      await scanner.stop();
+      running = false;
+    }
+  } catch(e) {}
+
+  if (window.opener && !window.opener.closed) {
+    window.opener.postMessage({
+      type: "FRENCH_BREW_QR",
+      token: decodedText
+    }, "https://script.google.com");
+
     window.close();
-  }, 700);
-
-} else {
-  showMessage("تعذر العودة إلى صفحة العامل. أغلق هذه الصفحة يدوياً.");
+  } else {
+    showMessage("تعذر الاتصال بصفحة العامل.");
+  }
 }
-          }
-        );
+
+ 
 
         running = true;
         showMessage("وجّه الكاميرا نحو QR الزبون");
